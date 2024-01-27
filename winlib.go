@@ -30,7 +30,7 @@ func UTF16PtrToString(p *uint16) string {
 }
 
 func StringToUTF8Ptr(s string) *byte {
-	p, err := syscall.BytePtrFromString(c)
+	p, err := syscall.BytePtrFromString(s)
 	if err != nil {
 		return nil
 	}
