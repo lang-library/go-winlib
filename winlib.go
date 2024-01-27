@@ -15,3 +15,15 @@ func WideCharPtrToString(s uintptr) string {
 	p := (*uint16)(unsafe.Pointer(s))
 	return windows.UTF16PtrToString(p)
 }
+
+func StringToUTF16Ptr(s string) *uint16 {
+	p, err := windows.UTF16PtrFromString(s)
+	if err != nil {
+		return nil
+	}
+	return p
+}
+
+func UTF16PtrToString(p *uint16) string {
+	return windows.UTF16PtrToString(p)
+}
