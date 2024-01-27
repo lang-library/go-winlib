@@ -2,7 +2,7 @@
 set -uvx
 set -e
 cwd=`pwd`
-version=0.1.4
+version=0.1.5
 git add .
 git commit -m"Release v$version"
 git tag -a v$version -mv$version

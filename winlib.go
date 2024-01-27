@@ -8,13 +8,13 @@ import (
 )
 
 func StringToWideCharAddr(s string) uintptr {
-	arr, _ := windows.UTF16PtrFromString(s)
+	arr := StringToUTF16Ptr(s)
 	return uintptr(unsafe.Pointer(arr))
 }
 
 func WideCharAddrToString(s uintptr) string {
 	p := (*uint16)(unsafe.Pointer(s))
-	return windows.UTF16PtrToString(p)
+	return UTF16PtrToString(p)
 }
 
 func StringToUTF16Ptr(s string) *uint16 {
@@ -27,6 +27,16 @@ func StringToUTF16Ptr(s string) *uint16 {
 
 func UTF16PtrToString(p *uint16) string {
 	return windows.UTF16PtrToString(p)
+}
+
+func StringToCharAddr(s string) uintptr {
+	arr := StringToUTF8Ptr(s)
+	return uintptr(unsafe.Pointer(arr))
+}
+
+func CharAddrToString(s uintptr) string {
+	p := (*byte)(unsafe.Pointer(s))
+	return UTF8PtrToString(p)
 }
 
 func StringToUTF8Ptr(s string) *byte {
