@@ -1,6 +1,7 @@
 package winlib
 
 import (
+	"syscall"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -26,4 +27,29 @@ func StringToUTF16Ptr(s string) *uint16 {
 
 func UTF16PtrToString(p *uint16) string {
 	return windows.UTF16PtrToString(p)
+}
+
+func StringToUTF8Ptr(s string) *byte {
+	p, err := syscall.BytePtrFromString(c)
+	if err != nil {
+		return nil
+	}
+	return p
+}
+
+func UTF8PtrToString(p *byte) string {
+	if p == nil {
+		return ""
+	}
+	var char byte
+	var chars = []byte{}
+	for i := 0; ; i++ {
+		char = *(*byte)(unsafe.Pointer(unsafe.Add(unsafe.Pointer(p), unsafe.Sizeof(byte(0))*uintptr(i))))
+		// null char
+		if char == 0 {
+			break
+		}
+		chars = append(chars, char)
+	}
+	return string(chars)
 }
