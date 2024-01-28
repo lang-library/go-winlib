@@ -62,3 +62,22 @@ func UTF8PtrToString(p *byte) string {
 	}
 	return string(chars)
 }
+
+// https://go.dev/src/os/executable_windows.go
+func GetModuleFileName(handle windows.Handle) string /*, error*/ {
+	n := uint32(1024)
+	var buf []uint16
+	for {
+		buf = make([]uint16, n)
+		r, err := windows.GetModuleFileName(handle, &buf[0], n)
+		if err != nil {
+			return "" /*, err*/
+		}
+		if r < n {
+			break
+		}
+		// r == n means n not big enough
+		n += 1024
+	}
+	return syscall.UTF16ToString(buf) /*, nil*/
+}
