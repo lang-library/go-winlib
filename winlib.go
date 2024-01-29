@@ -93,9 +93,9 @@ func (it *json_api) init(_dllName string) {
 }
 
 func NewJsonAPI(_dllName string) *json_api {
-	self := new(json_api)
-	self.init(_dllName)
-	return self
+	it := new(json_api)
+	it.init(_dllName)
+	return it
 }
 
 func (it *json_api) Call(name string, args any) any {
@@ -106,4 +106,34 @@ func (it *json_api) Call(name string, args any) any {
 	output := UTF8AddrToString(ptr)
 	result := global.FromJson(output)
 	return result
+}
+
+type json_server struct {
+	_funcTable map[string]func(any) any
+}
+
+func (it *json_server) init() {
+	it._funcTable = make(map[string]func(any) any)
+}
+
+func NewJsonServer() *json_server {
+	it := new(json_server)
+	it.init()
+	return it
+}
+
+func (it *json_server) Register(_name string, _func func(any) any) {
+	it._funcTable[_name] = _func
+}
+
+func (it *json_server) HandleCall(_namePtr, _jsonPtr uintptr) uintptr {
+	_name := UTF8AddrToString(_namePtr)
+	if it._funcTable[_name] == nil {
+		return StringToUTF8Addr("null")
+	}
+	_json := UTF8AddrToString(_jsonPtr)
+	_input := global.FromJson(_json)
+	_answer := it._funcTable[_name](_input)
+	_output := global.ToPrettyJson(_answer)
+	return StringToUTF8Addr(_output)
 }
