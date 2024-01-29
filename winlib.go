@@ -108,6 +108,19 @@ func (it *json_api) Call(name string, args any) any {
 	return result
 }
 
+func (it *json_api) CallOne(name string, args any) any {
+	_result := it.Call(name, args)
+	if _result == nil {
+		return nil
+	}
+	var _ary []any
+	var _ok bool
+	if _ary, _ok = _result.([]any); !_ok {
+		return _result
+	}
+	return _ary[0]
+}
+
 type json_server struct {
 	_funcTable map[string]func(any) any
 }
