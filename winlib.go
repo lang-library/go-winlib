@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/lang-library/go-global"
 	"golang.org/x/sys/windows"
 )
 
@@ -80,4 +81,29 @@ func GetModuleFileName(handle windows.Handle) string /*, error*/ {
 		n += 1024
 	}
 	return syscall.UTF16ToString(buf) /*, nil*/
+}
+
+type json_api struct {
+	_call *syscall.Proc
+}
+
+func (it *json_api) init(_dllName string) {
+	_dll, _ := syscall.LoadDLL(_dllName)
+	it._call, _ = _dll.FindProc("Call")
+}
+
+func NewJsonAPI(_dllName string) *json_api {
+	self := new(json_api)
+	self.init(_dllName)
+	return self
+}
+
+func (it *json_api) Call(name string, args any) any {
+	_json := global.ToJson(args)
+	ptr, _, _ := it._call.Call(
+		StringToUTF8Addr(name),
+		StringToUTF8Addr(_json))
+	output := UTF8AddrToString(ptr)
+	result := global.FromJson(output)
+	return result
 }

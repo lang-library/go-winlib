@@ -1,2 +1,4 @@
+github.com/lang-library/go-global v0.1.4 h1:yViRPeMYNuGpU5tECuWu4os5u9Es4ASHsILNr9Y1YFU=
+github.com/lang-library/go-global v0.1.4/go.mod h1:KCr8wljtU1+lbWjfa/gUVTL3XyQRcHKUNEmvQGbPeyM=
 golang.org/x/sys v0.16.0 h1:xWw16ngr6ZMtmxDyKyIgsE93KNKz5HKmMa3b8ALHidU=
 golang.org/x/sys v0.16.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
