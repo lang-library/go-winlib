@@ -92,6 +92,7 @@ type json_api struct {
 func (it *json_api) init(_dllName string) {
 	//_dll, _ := syscall.LoadDLL(_dllName)
 	//it._call, _ = _dll.FindProc("Call")
+	global.Echo(_dllName, "_dllName")
 	var handle windows.	Handle
 	var err error
 	if filepath.IsAbs(_dllName) {
