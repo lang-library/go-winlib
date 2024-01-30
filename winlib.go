@@ -91,9 +91,6 @@ type json_api struct {
 func (it *json_api) init(_dllName string) {
 	_dll, _ := syscall.LoadDLL(_dllName)
 	it._call, _ = _dll.FindProc("Call")
-	 func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
-	var proc uintptr
-	it._call, err = windows.GetProcAddress(handle, "Call")
 }
 
 func NewJsonAPI(_dllName string) *json_api {
