@@ -99,7 +99,7 @@ func (it *json_api) init(_dllName string) {
 		0,
 		windows.LOAD_WITH_ALTERED_SEARCH_PATH)
 	*/
-	handle, err = windows.LoadLibrary(dllName)
+	handle, err = windows.LoadLibrary(_dllName)
 	global.Echo(handle, "handle")
 	global.Echo(err, "err")
 	// func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
