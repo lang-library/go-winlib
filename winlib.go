@@ -3,7 +3,6 @@ package winlib
 import (
 	"syscall"
 	"unsafe"
-	"path/filepath"
 
 	"github.com/lang-library/go-global"
 	"golang.org/x/sys/windows"
