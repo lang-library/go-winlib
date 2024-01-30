@@ -97,7 +97,7 @@ func (it *json_api) init(_dllName string) {
 	if filepath.IsAbs(_dllName) {
 		global.Echo("<isAbs>")
 		handle, err = windows.LoadLibraryEx(
-			"D:\\.repo\\base14\\lang-demo\\cpp-load-ex\\dll1\\dll1.dll",
+			_dllName,
 			0,
 			windows.LOAD_WITH_ALTERED_SEARCH_PATH)
 	} else {
@@ -109,7 +109,6 @@ func (it *json_api) init(_dllName string) {
 	// func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
 	//var proc uintptr
 	it._call, err = windows.GetProcAddress(handle, "Call")
-
 }
 
 func NewJsonAPI(_dllName string) *json_api {
