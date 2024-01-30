@@ -85,30 +85,14 @@ func GetModuleFileName(handle windows.Handle) string /*, error*/ {
 }
 
 type json_api struct {
-	//_call *syscall.Proc
-	_call uintptr /* Proc */
+	_call *syscall.Proc
 }
 
 func (it *json_api) init(_dllName string) {
-	//_dll, _ := syscall.LoadDLL(_dllName)
-	//it._call, _ = _dll.FindProc("Call")
-	global.Echo(_dllName, "_dllName")
-	var handle windows.	Handle
-	var err error
-	if filepath.IsAbs(_dllName) {
-		global.Echo("<isAbs>")
-		handle, err = windows.LoadLibraryEx(
-			_dllName,
-			0,
-			windows.LOAD_WITH_ALTERED_SEARCH_PATH)
-	} else {
-		global.Echo("NOT <isAbs>")
-		handle, err = windows.LoadLibrary(_dllName)
-	}
-	global.Echo(handle, "handle")
-	global.Echo(err, "err")
-	// func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
-	//var proc uintptr
+	_dll, _ := syscall.LoadDLL(_dllName)
+	it._call, _ = _dll.FindProc("Call")
+	 func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
+	var proc uintptr
 	it._call, err = windows.GetProcAddress(handle, "Call")
 }
 
@@ -120,15 +104,9 @@ func NewJsonAPI(_dllName string) *json_api {
 
 func (it *json_api) Call(name string, args any) any {
 	_json := global.ToJson(args)
-	/*
 	ptr, _, _ := it._call.Call(
 		StringToUTF8Addr(name),
 		StringToUTF8Addr(_json))
-	*/
-	ptr, _, _ := syscall.Syscall(it._call, 0,
-		StringToUTF8Addr(name),
-		StringToUTF8Addr(_json),
-	    0)
 	output := UTF8AddrToString(ptr)
 	result := global.FromJson(output)
 	return result
