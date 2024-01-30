@@ -3,6 +3,7 @@ package winlib
 import (
 	"syscall"
 	"unsafe"
+	"path/filepath"
 
 	"github.com/lang-library/go-global"
 	"golang.org/x/sys/windows"
@@ -93,13 +94,16 @@ func (it *json_api) init(_dllName string) {
 	//it._call, _ = _dll.FindProc("Call")
 	var handle windows.	Handle
 	var err error
-	/*
-	handle, err = windows.LoadLibraryEx(
-		"D:\\.repo\\base14\\lang-demo\\cpp-load-ex\\dll1\\dll1.dll",
-		0,
-		windows.LOAD_WITH_ALTERED_SEARCH_PATH)
-	*/
-	handle, err = windows.LoadLibrary(_dllName)
+	if filepath.IsAbs(_dllName) {
+		global.Echo("<isAbs>")
+		handle, err = windows.LoadLibraryEx(
+			"D:\\.repo\\base14\\lang-demo\\cpp-load-ex\\dll1\\dll1.dll",
+			0,
+			windows.LOAD_WITH_ALTERED_SEARCH_PATH)
+	} else {
+		global.Echo("NOT <isAbs>")
+		handle, err = windows.LoadLibrary(_dllName)
+	}
 	global.Echo(handle, "handle")
 	global.Echo(err, "err")
 	// func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
