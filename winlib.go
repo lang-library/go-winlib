@@ -105,8 +105,6 @@ func (it *json_client) init(_dllName string) {
 		global.Echo("NOT <isAbs>")
 		handle, err = windows.LoadLibrary(_dllName)
 	}
-	//global.Echo(handle, "handle")
-	//global.Echo(err, "err")
 	if err != nil {
 		panic(err)
 	}
