@@ -170,7 +170,7 @@ func (it *json_server) HandleCall(_namePtr, _jsonPtr uintptr) uintptr {
 		_output := global.ToJson(_error.Error())
 		return StringToUTF8Addr(_output)
 	} else {
-		_output := global.ToPrettyJson(_answer)
+		_output := global.ToPrettyJson([]any{_answer})
 		return StringToUTF8Addr(_output)
 	}
 }
