@@ -1,7 +1,10 @@
 package winlib
 
 import (
+	"errors"
+	"fmt"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"unsafe"
 
@@ -66,14 +69,14 @@ func UTF8PtrToString(p *byte) string {
 }
 
 // https://go.dev/src/os/executable_windows.go
-func GetModuleFileName(handle windows.Handle) string /*, error*/ {
+func GetModuleFileName(handle windows.Handle) string {
 	n := uint32(1024)
 	var buf []uint16
 	for {
 		buf = make([]uint16, n)
 		r, err := windows.GetModuleFileName(handle, &buf[0], n)
 		if err != nil {
-			return "" /*, err*/
+			return ""
 		}
 		if r < n {
 			break
@@ -81,17 +84,14 @@ func GetModuleFileName(handle windows.Handle) string /*, error*/ {
 		// r == n means n not big enough
 		n += 1024
 	}
-	return syscall.UTF16ToString(buf) /*, nil*/
+	return syscall.UTF16ToString(buf)
 }
 
-type json_api struct {
-	//_call *syscall.Proc
+type json_client struct {
 	_call uintptr /* Proc */
 }
 
-func (it *json_api) init(_dllName string) {
-	//_dll, _ := syscall.LoadDLL(_dllName)
-	//it._call, _ = _dll.FindProc("Call")
+func (it *json_client) init(_dllName string) {
 	global.Echo(_dllName, "_dllName")
 	var handle windows.Handle
 	var err error
@@ -107,52 +107,42 @@ func (it *json_api) init(_dllName string) {
 	}
 	global.Echo(handle, "handle")
 	global.Echo(err, "err")
-	// func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
-	//var proc uintptr
-	it._call, err = windows.GetProcAddress(handle, "Call")
+	it._call, _ = windows.GetProcAddress(handle, "Call")
 }
 
-func NewJsonAPI(_dllName string) *json_api {
-	it := new(json_api)
+func NewJsonAPI(_dllName string) *json_client {
+	it := new(json_client)
 	it.init(_dllName)
 	return it
 }
 
-func (it *json_api) Call(name string, args any) any {
+func (it *json_client) Call(name string, args any) (any, error) {
 	_json := global.ToJson(args)
-	/*
-		ptr, _, _ := it._call.Call(
-			StringToUTF8Addr(name),
-			StringToUTF8Addr(_json))
-	*/
 	ptr, _, _ := syscall.Syscall(it._call, 0,
 		StringToUTF8Addr(name),
 		StringToUTF8Addr(_json),
 		0)
 	output := UTF8AddrToString(ptr)
-	result := global.FromJson(output)
-	return result
-}
-
-func (it *json_api) CallOne(name string, args any) any {
-	_result := it.Call(name, args)
-	if _result == nil {
-		return nil
+	output = strings.TrimSpace(output)
+	if strings.HasPrefix(output, "\"") {
+		result := global.FromJson(output)
+		err_msg := result.(string)
+		return nil, errors.New(err_msg)
+	} else if strings.HasPrefix(output, "[") {
+		result := global.FromJson(output)
+		var ary []any = result.([]any)
+		return ary[0], nil
+	} else {
+		panic(fmt.Sprintf("%s() returned malformed result json %s", name, output))
 	}
-	var _ary []any
-	var _ok bool
-	if _ary, _ok = _result.([]any); !_ok {
-		return _result
-	}
-	return _ary[0]
 }
 
 type json_server struct {
-	_funcTable map[string]func(any) any
+	_funcTable map[string]func(any) (any, error)
 }
 
 func (it *json_server) init() {
-	it._funcTable = make(map[string]func(any) any)
+	it._funcTable = make(map[string]func(any) (any, error))
 }
 
 func NewJsonServer() *json_server {
@@ -161,7 +151,7 @@ func NewJsonServer() *json_server {
 	return it
 }
 
-func (it *json_server) Register(_name string, _func func(any) any) {
+func (it *json_server) Register(_name string, _func func(any) (any, error)) {
 	it._funcTable[_name] = _func
 }
 
@@ -172,7 +162,12 @@ func (it *json_server) HandleCall(_namePtr, _jsonPtr uintptr) uintptr {
 	}
 	_json := UTF8AddrToString(_jsonPtr)
 	_input := global.FromJson(_json)
-	_answer := it._funcTable[_name](_input)
-	_output := global.ToPrettyJson(_answer)
-	return StringToUTF8Addr(_output)
+	_answer, _error := it._funcTable[_name](_input)
+	if _error != nil {
+		_output := global.ToJson(_error.Error())
+		return StringToUTF8Addr(_output)
+	} else {
+		_output := global.ToPrettyJson(_answer)
+		return StringToUTF8Addr(_output)
+	}
 }
