@@ -110,7 +110,7 @@ func (it *json_client) init(_dllName string) {
 	it._call, _ = windows.GetProcAddress(handle, "Call")
 }
 
-func NewJsonAPI(_dllName string) *json_client {
+func NewJsonClient(_dllName string) *json_client {
 	it := new(json_client)
 	it.init(_dllName)
 	return it
@@ -158,7 +158,9 @@ func (it *json_server) Register(_name string, _func func(any) (any, error)) {
 func (it *json_server) HandleCall(_namePtr, _jsonPtr uintptr) uintptr {
 	_name := UTF8AddrToString(_namePtr)
 	if it._funcTable[_name] == nil {
-		return StringToUTF8Addr("null")
+		err_msg := fmt.Sprintf("%s() not defined", _name)
+		_output := global.ToJson(err_msg)
+		return StringToUTF8Addr(_output)
 	}
 	_json := UTF8AddrToString(_jsonPtr)
 	_input := global.FromJson(_json)
